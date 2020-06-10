@@ -1,0 +1,18 @@
+﻿@page "/pizzas"
+@model Pages.Model.PizzasModel
+
+@if(Model.Pizzas.Count > 0)
+{
+    <div class="card-deck justify-content-center">
+        @foreach (var item in Model.Pizzas)
+        {
+            <component type="typeof(ItemComponent)" render-mode="ServerPrerendered" param-Item="@item"></component>
+            <component type="typeof(ItemComponent)" render-mode="ServerPrerendered" param-Item="@item"></component>
+            <component type="typeof(ItemComponent)" render-mode="ServerPrerendered" param-Item="@item"></component>
+        }
+    </div>
+}
+else
+{
+    <h2>Nothing to show here!</h2>
+}
