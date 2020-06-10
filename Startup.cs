@@ -1,6 +1,8 @@
+using System.Linq;
 using Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,10 +27,15 @@ namespace BlazingPizza
             });
             services.AddServerSideBlazor();
             services.AddTransient<IRepository, Repository>();
+            services.AddHttpContextAccessor();
+
+            services.AddDistributedMemoryCache();
+            services.AddSession();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseSession();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -40,6 +47,13 @@ namespace BlazingPizza
             {
                 endpoints.MapRazorPages();
                 endpoints.MapBlazorHub();
+            });
+            app.Run(async (context) =>
+            {
+                if (!context.Session.Keys.Contains("Cart"))
+                {
+                    context.Session.SetString("Cart", "0");
+                }
             });
         }
     }

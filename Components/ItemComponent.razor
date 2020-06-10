@@ -1,5 +1,6 @@
 @using Models
-@using System.Threading;
+@using Data
+@inject IHttpContextAccessor HttpContextAccessor
 <div class="card m-1 d-flex" style="min-width: 18rem; max-width: 30%">
     <div class="embed-responsive embed-responsive-1by1">
         <img src="@Item.Image" class="card-img-top embed-responsive-item">
@@ -7,31 +8,34 @@
     <div class="card-body">
         <h5 class="card-title">@Item.Name</h5>
         <h6 class="card-subtitle mb-2 text-muted">@Item.Price$</h6>
-        <p class="card-text">@Item.Description</p>
-        <div class="input-group">
-          <span class="input-group-btn">
-              <button type="button" class="btn btn-default btn-md" @onclick="RemoveQuantiy">
-                  <span class="glyphicon glyphicon-minus">-</span>
-              </button>
-          </span>
-          <input type="text" class="form-control input-number" value="@_quantity">
-          <span class="input-group-btn">
-              <button type="button" class="btn btn-default btn-md" @onclick="AddQuantity">
-                  <span class="glyphicon glyphicon-plus">+</span>
-              </button>
-          </span>
-      </div>
-        <a class="btn btn-primary" @onclick="ShowAlert">Dadaj u košyk</a>
-        <a class="btn btn-primary">Detali...</a>
         @if(_showAlert)
         {
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                Item was added to the cart.
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="DismissAlert">
+                Dadali ŭ košyk!
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="@(() => _showAlert = false)">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
         }
+        else
+        {
+            <p class="card-text">@Item.Description</p>
+        }
+        <div class="input-group">
+          <span class="input-group-btn">
+              <button type="button" class="btn btn-secondary btn-md" @onclick="RemoveQuantiy">
+                  -
+              </button>
+          </span>
+          <input type="text" class="form-control input-number" value="@_quantity">
+          <span class="input-group-btn">
+              <button type="button" class="btn btn-secondary btn-md" @onclick="AddQuantity">
+                  +
+              </button>
+          </span>
+      </div>
+        <a class="btn btn-primary" @onclick="@(e => {_showAlert = true; AddToCart(e);})">Dadaj u košyk</a>
+        <a class="btn btn-primary">Detali...</a>
     </div>
 </div>
 @code {
@@ -39,8 +43,6 @@
     public Item Item { get; set; }
     private bool _showAlert;
     private int _quantity = 1;
-    private void ShowAlert() => _showAlert = true;
-    private void DismissAlert() => _showAlert = false;
     private void AddQuantity()
     {
         if (_quantity < 5) _quantity++;
@@ -48,5 +50,23 @@
     private void RemoveQuantiy()
     {
         if (_quantity > 1) _quantity--;
+    }
+    private void AddToCart(MouseEventArgs e)
+    {
+        var context = HttpContextAccessor.HttpContext;
+        if (context.Session.Keys.Contains("Cart"))
+        {
+            var cart = context.Session.Get<Dictionary<int, int>>("Cart");
+            if (cart.Keys.Contains(Item.Id))
+            {
+                cart[Item.Id] += _quantity;
+                context.Session.Set<Dictionary<int, int>>("Cart", cart);
+            }
+            else
+            {
+                cart[Item.Id] = _quantity;
+                context.Session.Set<Dictionary<int, int>>("Cart", cart);
+            }
+        }
     }
 }
