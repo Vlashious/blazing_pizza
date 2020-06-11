@@ -48,13 +48,6 @@ namespace BlazingPizza
                 endpoints.MapRazorPages();
                 endpoints.MapBlazorHub();
             });
-            app.Run(async (context) =>
-            {
-                if (!context.Session.Keys.Contains("Cart"))
-                {
-                    context.Session.SetString("Cart", "0");
-                }
-            });
         }
     }
 }

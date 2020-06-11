@@ -68,5 +68,10 @@
                 context.Session.Set<Dictionary<int, int>>("Cart", cart);
             }
         }
+        else
+        {
+            var cart = new Dictionary<int, int> { { Item.Id, _quantity } };
+            context.Session.Set<Dictionary<int, int>>("Cart", cart);
+        }
     }
 }

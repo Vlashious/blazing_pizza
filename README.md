@@ -4,4 +4,4 @@ Bootstrap 4.5 is used for creating user interface, while Blazor Components are u
 
 This app used SQLite database with Entity Framework v. 3.1.4.
 
-### TODO: cart and submit implementations.
+### TODO: submit the order implementation.
