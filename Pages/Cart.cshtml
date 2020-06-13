@@ -2,19 +2,5 @@
 @model Pages.Model.CartModel
 @{
 }
-@if(Model.CartItems.Count > 0)
-{
-    <ul>
-        @foreach (var key in Model.CartItems.Keys)
-        {
-            <li>
-                Name = @key.Name
-                Quantity = @Model.CartItems[key];
-            </li>
-        }
-    </ul>
-}
-else
-{
-    <h1>Nothing in the cart!</h1>
-}
+
+<component type="typeof(CartComponent)" render-mode="ServerPrerendered"></component>

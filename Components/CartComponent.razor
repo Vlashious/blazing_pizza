@@ -1,0 +1,57 @@
+@using Models
+@inject IRepository _repo
+@inject IHttpContextAccessor HttpContextAccessor
+@if(CartItems?.Count > 0)
+{
+    <ul>
+        @foreach (var key in CartItems.Keys)
+        {
+            <li>
+                Name = @key.Name
+                Quantity = @CartItems[key]
+                <button type="button" class="close" aria-label="Close" @onclick="(() => RemoveItem(key.Id))">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <h1>Nothing to show here!</h1>
+}
+
+@code {
+    public Dictionary<Item, int> CartItems { get; set; } = new Dictionary<Item, int>();
+    private Dictionary<int, int> _sessionCart = new Dictionary<int, int>();
+    private HttpContext _httpContext;
+
+    private void RemoveItem(int key)
+    {
+        _sessionCart.Remove(key);
+        _httpContext.Session.Set<Dictionary<int, int>>("Cart", _sessionCart);
+        CartItems.Clear();
+        if (_sessionCart?.Count > 0)
+        {
+            foreach (var itemKey in _sessionCart.Keys)
+            {
+                var item = _repo.GetItem(itemKey);
+                CartItems[item] = _sessionCart[itemKey];
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _httpContext = HttpContextAccessor.HttpContext;
+        _sessionCart = _httpContext.Session.Get<Dictionary<int, int>>("Cart");
+        if (_sessionCart?.Count > 0)
+        {
+            foreach (var key in _sessionCart.Keys)
+            {
+                var item = _repo.GetItem(key);
+                CartItems[item] = _sessionCart[key];
+            }
+        }
+    }
+}
