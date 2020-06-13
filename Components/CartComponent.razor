@@ -1,6 +1,7 @@
 @using Models
 @inject IRepository _repo
 @inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavManager
 @if(CartItems?.Count > 0)
 {
     <ul>
@@ -15,6 +16,26 @@
             </li>
         }
     </ul>
+    <EditForm Model="@_customer" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <p>
+            <label>Phone:</label>
+            <InputText id="phone" @bind-Value="_customer.PhoneNumber" />
+        </p>
+        <p>
+            <label>Name:</label>
+            <InputText id="name" @bind-Value="_customer.Name" />
+        </p>
+        <p>
+            <label>Address:</label>
+            <InputText id="address" @bind-Value="_customer.Address" />
+        </p>
+        <p>
+            <InputText type="hidden" id="order" @bind-Value="_customer.Order" />
+        </p>
+        <button type="submit">Submit</button>
+    </EditForm>
 }
 else
 {
@@ -25,11 +46,13 @@ else
     public Dictionary<Item, int> CartItems { get; set; } = new Dictionary<Item, int>();
     private Dictionary<int, int> _sessionCart = new Dictionary<int, int>();
     private HttpContext _httpContext;
+    private Customer _customer = new Customer();
 
     private void RemoveItem(int key)
     {
         _sessionCart.Remove(key);
         _httpContext.Session.Set<Dictionary<int, int>>("Cart", _sessionCart);
+        _customer.Order = JsonConvert.SerializeObject(_sessionCart);
         CartItems.Clear();
         if (_sessionCart?.Count > 0)
         {
@@ -45,6 +68,7 @@ else
     {
         _httpContext = HttpContextAccessor.HttpContext;
         _sessionCart = _httpContext.Session.Get<Dictionary<int, int>>("Cart");
+        _customer.Order = JsonConvert.SerializeObject(_sessionCart);
         if (_sessionCart?.Count > 0)
         {
             foreach (var key in _sessionCart.Keys)
@@ -53,5 +77,12 @@ else
                 CartItems[item] = _sessionCart[key];
             }
         }
+    }
+
+    private void HandleValidSubmit()
+    {
+        _repo.AddCustomer(_customer);
+        _repo.SaveChanges();
+        NavManager.NavigateTo("/index", true);
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Models;
 
 namespace Data
@@ -7,5 +8,7 @@ namespace Data
     {
         public Item GetItem(int id);
         public List<Item> GetItems(Item.ItemType itemType);
+        public void AddCustomer(Customer newCustomer);
+        public Task<bool> SaveChanges();
     }
 }
